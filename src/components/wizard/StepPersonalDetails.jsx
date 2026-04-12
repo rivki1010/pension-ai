@@ -1,11 +1,22 @@
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { base44 } from "@/api/base44Client";
-import { Loader2, ArrowLeft, User } from "lucide-react";
+import {
+  base44,
+  getStoredAIBaseUrl,
+  getStoredAIKey,
+  getStoredAIModel,
+  getStoredAIProvider,
+  setStoredAIBaseUrl,
+  setStoredAIKey,
+  setStoredAIModel,
+  setStoredAIProvider,
+} from "@/api/base44Client";
+import { Loader2, ArrowLeft, User, KeyRound } from "lucide-react";
 import { motion } from "framer-motion";
+import { AI_PROVIDERS, defaultModelForProvider } from "@/lib/aiProviders";
 
 export default function StepPersonalDetails({ initialProfile, onNext }) {
   const [form, setForm] = useState({
@@ -16,11 +27,34 @@ export default function StepPersonalDetails({ initialProfile, onNext }) {
     marital_status: initialProfile?.marital_status || "single",
     salary_growth_pct: initialProfile?.salary_growth_pct || 2,
   });
+
+  const [provider, setProvider] = useState(getStoredAIProvider());
+  const [apiKey, setApiKey] = useState(getStoredAIKey());
+  const [model, setModel] = useState(getStoredAIModel());
+  const [baseUrl, setBaseUrl] = useState(getStoredAIBaseUrl());
+
   const [saving, setSaving] = useState(false);
+
+  const showBaseUrl = useMemo(() => provider === "custom", [provider]);
+
+  const field = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+
+  const handleProviderChange = (next) => {
+    setProvider(next);
+    if (!model || model === defaultModelForProvider(provider)) {
+      setModel(defaultModelForProvider(next));
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
+
+    setStoredAIProvider(provider);
+    setStoredAIKey(apiKey.trim());
+    setStoredAIModel(model.trim() || defaultModelForProvider(provider));
+    setStoredAIBaseUrl(baseUrl.trim());
+
     const data = {
       birth_year: Number(form.birth_year),
       gender: form.gender,
@@ -29,17 +63,17 @@ export default function StepPersonalDetails({ initialProfile, onNext }) {
       marital_status: form.marital_status,
       salary_growth_pct: Number(form.salary_growth_pct),
     };
+
     let result;
     if (initialProfile?.id) {
       result = await base44.entities.UserFinancialProfile.update(initialProfile.id, data);
     } else {
       result = await base44.entities.UserFinancialProfile.create(data);
     }
+
     setSaving(false);
     onNext(result);
   };
-
-  const field = (key, value) => setForm(prev => ({ ...prev, [key]: value }));
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
@@ -48,56 +82,155 @@ export default function StepPersonalDetails({ initialProfile, onNext }) {
           <User className="w-6 h-6 text-primary" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-foreground font-rubik">Χ¤Χ¨ΧΧ™Χ ΧΧ™Χ©Χ™Χ™Χ</h2>
-          <p className="text-muted-foreground text-sm">Χ”Χ¤Χ¨ΧΧ™Χ Χ™Χ©ΧΧ©Χ• ΧΧ—Χ™Χ©Χ•Χ‘ Χ’Χ™Χ Χ”Χ¤Χ¨Χ™Χ©Χ”, ΧΧ΅ Χ”Χ›Χ Χ΅Χ” Χ•Χ§Χ¦Χ‘Χª Χ”Χ–Χ§Χ Χ”</p>
+          <h2 className="text-2xl font-bold text-foreground font-rubik">τψθιν ΰιωιιν + ηιαεψ AI</h2>
+          <p className="text-muted-foreground text-sm">λΰο ξβγιψιν τςν ΰηϊ τψετιμ εβν ξτϊη API ΰιωι.</p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-card rounded-2xl border border-border/50 p-6 shadow-sm space-y-5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div className="space-y-2">
-            <Label>Χ©Χ Χª ΧΧ™Χ“Χ” <span className="text-destructive">*</span></Label>
-            <Input type="number" placeholder="1985" value={form.birth_year} onChange={e => field("birth_year", e.target.value)} required />
+      <form onSubmit={handleSubmit} className="bg-card rounded-2xl border border-border/50 p-6 shadow-sm space-y-6">
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <KeyRound className="w-4 h-4 text-primary" />
+            <h3 className="font-semibold text-foreground">δβγψεϊ ρτχ AI</h3>
           </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>ρτχ AI</Label>
+              <Select value={provider} onValueChange={handleProviderChange}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {AI_PROVIDERS.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>ξεγμ</Label>
+              <Input value={model} onChange={(e) => setModel(e.target.value)} dir="ltr" />
+            </div>
+          </div>
+
           <div className="space-y-2">
-            <Label>ΧΧ™Χ <span className="text-destructive">*</span></Label>
-            <Select value={form.gender} onValueChange={v => field("gender", v)} required>
-              <SelectTrigger><SelectValue placeholder="Χ‘Χ—Χ¨ ΧΧ™Χ" /></SelectTrigger>
+            <Label>API Key</Label>
+            <Input
+              type="password"
+              dir="ltr"
+              autoComplete="off"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              placeholder="sk-... / claude-... / AIza..."
+              required
+            />
+          </div>
+
+          {showBaseUrl && (
+            <div className="space-y-2">
+              <Label>Base URL (OpenAI-Compatible)</Label>
+              <Input
+                dir="ltr"
+                value={baseUrl}
+                onChange={(e) => setBaseUrl(e.target.value)}
+                placeholder="https://api.example.com/v1"
+                required
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 border-t border-border/50 pt-6">
+          <div className="space-y-2">
+            <Label>
+              ωπϊ μιγδ <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              type="number"
+              placeholder="1985"
+              value={form.birth_year}
+              onChange={(e) => field("birth_year", e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>
+              ξιο <span className="text-destructive">*</span>
+            </Label>
+            <Select value={form.gender} onValueChange={(v) => field("gender", v)} required>
+              <SelectTrigger>
+                <SelectValue placeholder="αηψ ξιο" />
+              </SelectTrigger>
               <SelectContent>
-                <SelectItem value="male">Χ–Χ›Χ¨</SelectItem>
-                <SelectItem value="female">Χ Χ§Χ‘Χ”</SelectItem>
+                <SelectItem value="male">ζλψ</SelectItem>
+                <SelectItem value="female">πχαδ</SelectItem>
               </SelectContent>
             </Select>
           </div>
+
           <div className="space-y-2">
-            <Label>Χ©Χ›Χ¨ Χ‘Χ¨Χ•ΧΧ• Χ—Χ•Χ“Χ©Χ™ (β‚ª) <span className="text-destructive">*</span></Label>
-            <Input type="number" placeholder="15,000" value={form.current_salary} onChange={e => field("current_salary", e.target.value)} required />
+            <Label>
+              ωλψ αψεθε ηεγωι (¤) <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              type="number"
+              placeholder="15,000"
+              value={form.current_salary}
+              onChange={(e) => field("current_salary", e.target.value)}
+              required
+            />
           </div>
+
           <div className="space-y-2">
-            <Label>Χ’Χ™Χ Χ¤Χ¨Χ™Χ©Χ” ΧΧªΧ•Χ›Χ Χ</Label>
-            <Input type="number" placeholder={form.gender === "female" ? "65" : "67"} value={form.retirement_age} onChange={e => field("retirement_age", e.target.value)} />
-            <p className="text-xs text-muted-foreground">Χ‘Χ¨Χ™Χ¨Χª ΧΧ—Χ“Χ: Χ’Χ‘Χ¨ 67 / ΧΧ™Χ©Χ” 65</p>
+            <Label>βιμ τψιωδ ξϊελπο</Label>
+            <Input
+              type="number"
+              placeholder={form.gender === "female" ? "65" : "67"}
+              value={form.retirement_age}
+              onChange={(e) => field("retirement_age", e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">αψιψϊ ξηγμ: βαψ 67 / ΰιωδ 65</p>
           </div>
+
           <div className="space-y-2">
-            <Label>ΧΧ¦Χ‘ ΧΧ©Χ¤Χ—ΧªΧ™</Label>
-            <Select value={form.marital_status} onValueChange={v => field("marital_status", v)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Label>ξφα ξωτηϊι</Label>
+            <Select value={form.marital_status} onValueChange={(v) => field("marital_status", v)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                <SelectItem value="single">Χ¨Χ•Χ•Χ§/Χ”</SelectItem>
-                <SelectItem value="married">Χ Χ©Χ•Χ™/ΧΧ”</SelectItem>
+                <SelectItem value="single">ψεεχ/δ</SelectItem>
+                <SelectItem value="married">πωει/ΰδ</SelectItem>
               </SelectContent>
             </Select>
           </div>
+
           <div className="space-y-2">
-            <Label>Χ¦Χ¤Χ™ ΧΆΧΧ™Χ™Χª Χ©Χ›Χ¨ Χ©Χ ΧªΧ™Χª (%)</Label>
-            <Input type="number" step="0.1" placeholder="2" value={form.salary_growth_pct} onChange={e => field("salary_growth_pct", e.target.value)} />
+            <Label>φτι ςμιιϊ ωλψ ωπϊιϊ (%)</Label>
+            <Input
+              type="number"
+              step="0.1"
+              placeholder="2"
+              value={form.salary_growth_pct}
+              onChange={(e) => field("salary_growth_pct", e.target.value)}
+            />
           </div>
         </div>
 
         <div className="flex justify-start pt-2">
-          <Button type="submit" disabled={saving || !form.birth_year || !form.gender || !form.current_salary} size="lg" className="gap-2">
+          <Button
+            type="submit"
+            disabled={saving || !form.birth_year || !form.gender || !form.current_salary || !apiKey.trim()}
+            size="lg"
+            className="gap-2"
+          >
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowLeft className="w-4 h-4" />}
-            Χ”ΧΧ©Χ ΧΧ©ΧΧ‘ Χ”Χ‘Χ
+            δξωκ μωμα δαΰ
           </Button>
         </div>
       </form>

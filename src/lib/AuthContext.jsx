@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
-import { base44, getStoredOpenAIKey } from "@/api/base44Client";
+import { base44, getStoredAIKey } from "@/api/base44Client";
 
 const AuthContext = createContext();
 
@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const [profiles] = await Promise.all([base44.entities.UserFinancialProfile.list()]);
-      const hasApiKey = Boolean(getStoredOpenAIKey().trim());
+      const hasApiKey = Boolean(getStoredAIKey().trim());
       const hasProfile = profiles.length > 0;
 
       setUser({

@@ -1,36 +1,66 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { KeyRound, CheckCircle2, CircleAlert, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { base44, getStoredOpenAIKey, getStoredOpenAIModel, setStoredOpenAIKey, setStoredOpenAIModel } from "@/api/base44Client";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  base44,
+  getStoredAIBaseUrl,
+  getStoredAIKey,
+  getStoredAIModel,
+  getStoredAIProvider,
+  setStoredAIBaseUrl,
+  setStoredAIKey,
+  setStoredAIModel,
+  setStoredAIProvider,
+} from "@/api/base44Client";
 import { useAuth } from "@/lib/AuthContext";
+import { AI_PROVIDERS, defaultModelForProvider } from "@/lib/aiProviders";
 
 export default function Settings() {
   const { user, checkAppState } = useAuth();
+  const [provider, setProvider] = useState("openai");
   const [apiKey, setApiKey] = useState("");
-  const [model, setModel] = useState("gpt-4.1-mini");
+  const [model, setModel] = useState("");
+  const [baseUrl, setBaseUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [profileExists, setProfileExists] = useState(false);
 
   useEffect(() => {
-    setApiKey(getStoredOpenAIKey());
-    setModel(getStoredOpenAIModel());
+    const p = getStoredAIProvider();
+    setProvider(p);
+    setApiKey(getStoredAIKey());
+    setModel(getStoredAIModel());
+    setBaseUrl(getStoredAIBaseUrl());
     loadProfileStatus();
   }, []);
+
+  const showBaseUrl = useMemo(() => provider === "custom", [provider]);
 
   const loadProfileStatus = async () => {
     const profiles = await base44.entities.UserFinancialProfile.list();
     setProfileExists(profiles.length > 0);
   };
 
+  const onProviderChange = (next) => {
+    setProvider(next);
+    if (!model || model === defaultModelForProvider(provider)) {
+      setModel(defaultModelForProvider(next));
+    }
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
-    setStoredOpenAIKey(apiKey.trim());
-    setStoredOpenAIModel(model.trim() || "gpt-4.1-mini");
+
+    setStoredAIProvider(provider);
+    setStoredAIKey(apiKey.trim());
+    setStoredAIModel(model.trim() || defaultModelForProvider(provider));
+    setStoredAIBaseUrl(baseUrl.trim());
+
     await checkAppState();
     await loadProfileStatus();
     setSaving(false);
@@ -38,14 +68,14 @@ export default function Settings() {
     window.setTimeout(() => setSaved(false), 1800);
   };
 
-  const hasApiKey = Boolean((user?.hasApiKey ?? apiKey.trim().length > 0));
+  const hasApiKey = Boolean(user?.hasApiKey ?? apiKey.trim().length > 0);
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-foreground font-rubik">הגדרות מקומיות</h1>
+        <h1 className="text-3xl font-bold text-foreground font-rubik">הגדרות AI מקומיות</h1>
         <p className="text-muted-foreground">
-          האפליקציה רצה כאתר סטטי. המידע נשמר רק בדפדפן שלך והמפתח נשמר מקומית ב-LocalStorage.
+          המידע נשמר בדפדפן שלך בלבד. ניתן לבחור ספק AI ולהזין מפתח אישי (BYOK).
         </p>
       </div>
 
@@ -55,34 +85,57 @@ export default function Settings() {
             <KeyRound className="w-5 h-5 text-primary" />
           </div>
           <div className="space-y-1">
-            <p className="font-semibold text-foreground">OpenAI API Key (BYOK)</p>
-            <p className="text-xs text-muted-foreground">הכנס מפתח אישי. בלי מפתח לא יתבצע פענוח מסמכים ולא יופק דוח AI.</p>
+            <p className="font-semibold text-foreground">הגדרות ספק ומפתח</p>
+            <p className="text-xs text-muted-foreground">תמיכה: OpenAI, Anthropic, Gemini, OpenRouter, Groq וגם OpenAI-Compatible.</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label>ספק AI</Label>
+            <Select value={provider} onValueChange={onProviderChange}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {AI_PROVIDERS.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>מודל</Label>
+            <Input value={model} onChange={(e) => setModel(e.target.value)} dir="ltr" />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="openai-key">API Key</Label>
+          <Label>API Key</Label>
           <Input
-            id="openai-key"
             type="password"
             autoComplete="off"
             dir="ltr"
             value={apiKey}
             onChange={(e) => setApiKey(e.target.value)}
-            placeholder="sk-..."
+            placeholder="sk-... / claude-... / AIza..."
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="openai-model">Model</Label>
-          <Input
-            id="openai-model"
-            dir="ltr"
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
-            placeholder="gpt-4.1-mini"
-          />
-        </div>
+        {showBaseUrl && (
+          <div className="space-y-2">
+            <Label>Base URL (OpenAI-Compatible)</Label>
+            <Input
+              dir="ltr"
+              value={baseUrl}
+              onChange={(e) => setBaseUrl(e.target.value)}
+              placeholder="https://api.example.com/v1"
+            />
+          </div>
+        )}
 
         <Button type="submit" disabled={saving} className="gap-2">
           {saving ? (
@@ -98,16 +151,8 @@ export default function Settings() {
 
       <div className="bg-card rounded-2xl border border-border/50 p-6 shadow-sm space-y-3">
         <h2 className="font-bold text-foreground font-rubik">סטטוס מוכנות</h2>
-        <StatusRow
-          ok={hasApiKey}
-          textOk="מפתח API הוגדר"
-          textMissing="חסר מפתח API"
-        />
-        <StatusRow
-          ok={profileExists}
-          textOk="פרופיל אישי קיים"
-          textMissing="חסר פרופיל אישי"
-        />
+        <StatusRow ok={hasApiKey} textOk="מפתח API הוגדר" textMissing="חסר מפתח API" />
+        <StatusRow ok={profileExists} textOk="פרופיל אישי קיים" textMissing="חסר פרופיל אישי" />
 
         <div className="flex flex-wrap gap-2 pt-2">
           <Button asChild variant="outline">
@@ -125,11 +170,7 @@ export default function Settings() {
 function StatusRow({ ok, textOk, textMissing }) {
   return (
     <div className="flex items-center gap-2 text-sm">
-      {ok ? (
-        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-      ) : (
-        <CircleAlert className="w-4 h-4 text-amber-600" />
-      )}
+      {ok ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : <CircleAlert className="w-4 h-4 text-amber-600" />}
       <span className={ok ? "text-foreground" : "text-muted-foreground"}>{ok ? textOk : textMissing}</span>
     </div>
   );

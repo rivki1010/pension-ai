@@ -1,6 +1,8 @@
 export const STORAGE_KEYS = {
-  OPENAI_KEY: "pension_ai_openai_key",
-  OPENAI_MODEL: "pension_ai_openai_model",
+  AI_PROVIDER: "pension_ai_ai_provider",
+  AI_API_KEY: "pension_ai_ai_api_key",
+  AI_MODEL: "pension_ai_ai_model",
+  AI_BASE_URL: "pension_ai_ai_base_url",
   USER_PROFILES: "pension_ai_user_profiles",
   PENSION_DOCUMENTS: "pension_ai_pension_documents",
 };
