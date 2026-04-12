@@ -8,10 +8,10 @@ import StepReturnRate from "../components/wizard/StepReturnRate";
 import StepResults from "../components/wizard/StepResults";
 
 const STEPS = [
-  { number: 1, label: "פרטים אישיים" },
-  { number: 2, label: "העלאת מסמכים" },
-  { number: 3, label: "בחירת תשואה" },
-  { number: 4, label: "תוצאות" },
+  { number: 1, label: "Personal + API" },
+  { number: 2, label: "Upload Documents" },
+  { number: 3, label: "Return Assumptions" },
+  { number: 4, label: "Results" },
 ];
 
 export default function PensionWizard() {
@@ -37,22 +37,6 @@ export default function PensionWizard() {
     setLoading(false);
   };
 
-  const handleProfileSave = (p) => {
-    setProfile(p);
-    setStep(2);
-  };
-
-  const handleDocumentsDone = (docs) => {
-    setDocuments(docs);
-    setStep(3);
-  };
-
-  const handleReturnChosen = ({ mode, value }) => {
-    setReturnMode(mode);
-    setManualReturn(value);
-    setStep(4);
-  };
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -65,11 +49,7 @@ export default function PensionWizard() {
     <div className="max-w-3xl mx-auto space-y-8">
       <div className="flex items-center justify-between relative">
         <div className="absolute top-5 right-0 left-0 h-0.5 bg-border -z-10" />
-        <div
-          className="absolute top-5 right-0 h-0.5 bg-primary transition-all duration-700 -z-10"
-          style={{ width: `${((step - 1) / (STEPS.length - 1)) * 100}%` }}
-        />
-
+        <div className="absolute top-5 right-0 h-0.5 bg-primary transition-all duration-700 -z-10" style={{ width: `${((step - 1) / (STEPS.length - 1)) * 100}%` }} />
         {STEPS.map((s) => {
           const done = step > s.number;
           const active = step === s.number;
@@ -93,25 +73,11 @@ export default function PensionWizard() {
       </div>
 
       <AnimatePresence mode="wait">
-        <motion.div
-          key={step}
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: 30 }}
-          transition={{ duration: 0.3 }}
-        >
-          {step === 1 && <StepPersonalDetails initialProfile={profile} onNext={handleProfileSave} />}
-          {step === 2 && <StepDocuments initialDocuments={documents} onNext={handleDocumentsDone} onBack={() => setStep(1)} />}
-          {step === 3 && <StepReturnRate documents={documents} onNext={handleReturnChosen} onBack={() => setStep(2)} />}
-          {step === 4 && (
-            <StepResults
-              profile={profile}
-              documents={documents}
-              returnMode={returnMode}
-              manualReturn={manualReturn}
-              onRestart={() => setStep(1)}
-            />
-          )}
+        <motion.div key={step} initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 30 }} transition={{ duration: 0.3 }}>
+          {step === 1 && <StepPersonalDetails initialProfile={profile} onNext={(p) => { setProfile(p); setStep(2); }} />}
+          {step === 2 && <StepDocuments initialDocuments={documents} onNext={(docs) => { setDocuments(docs); setStep(3); }} onBack={() => setStep(1)} />}
+          {step === 3 && <StepReturnRate documents={documents} onNext={({ mode, value }) => { setReturnMode(mode); setManualReturn(value); setStep(4); }} onBack={() => setStep(2)} />}
+          {step === 4 && <StepResults profile={profile} documents={documents} returnMode={returnMode} manualReturn={manualReturn} onRestart={() => setStep(1)} />}
         </motion.div>
       </AnimatePresence>
     </div>

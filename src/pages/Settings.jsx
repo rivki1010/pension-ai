@@ -47,20 +47,16 @@ export default function Settings() {
 
   const onProviderChange = (next) => {
     setProvider(next);
-    if (!model || model === defaultModelForProvider(provider)) {
-      setModel(defaultModelForProvider(next));
-    }
+    if (!model || model === defaultModelForProvider(provider)) setModel(defaultModelForProvider(next));
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
-
     setStoredAIProvider(provider);
     setStoredAIKey(apiKey.trim());
     setStoredAIModel(model.trim() || defaultModelForProvider(provider));
     setStoredAIBaseUrl(baseUrl.trim());
-
     await checkAppState();
     await loadProfileStatus();
     setSaving(false);
@@ -73,94 +69,62 @@ export default function Settings() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-foreground font-rubik">הגדרות AI מקומיות</h1>
-        <p className="text-muted-foreground">
-          המידע נשמר בדפדפן שלך בלבד. ניתן לבחור ספק AI ולהזין מפתח אישי (BYOK).
-        </p>
+        <h1 className="text-3xl font-bold text-foreground font-rubik">AI Settings</h1>
+        <p className="text-muted-foreground">This app is local-first. Keys and profile data are saved in your browser only.</p>
       </div>
 
       <form onSubmit={handleSave} className="bg-card rounded-2xl border border-border/50 p-6 shadow-sm space-y-5">
         <div className="flex items-start gap-3">
-          <div className="p-2.5 rounded-xl bg-primary/10">
-            <KeyRound className="w-5 h-5 text-primary" />
-          </div>
+          <div className="p-2.5 rounded-xl bg-primary/10"><KeyRound className="w-5 h-5 text-primary" /></div>
           <div className="space-y-1">
-            <p className="font-semibold text-foreground">הגדרות ספק ומפתח</p>
-            <p className="text-xs text-muted-foreground">תמיכה: OpenAI, Anthropic, Gemini, OpenRouter, Groq וגם OpenAI-Compatible.</p>
+            <p className="font-semibold text-foreground">Provider and API key</p>
+            <p className="text-xs text-muted-foreground">Supports OpenAI, Anthropic, Gemini, OpenRouter, Groq, and custom OpenAI-compatible endpoints.</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label>ספק AI</Label>
+            <Label>AI provider</Label>
             <Select value={provider} onValueChange={onProviderChange}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
+              <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {AI_PROVIDERS.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {p.label}
-                  </SelectItem>
-                ))}
+                {AI_PROVIDERS.map((p) => <SelectItem key={p.id} value={p.id}>{p.label}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <Label>מודל</Label>
+            <Label>Model</Label>
             <Input value={model} onChange={(e) => setModel(e.target.value)} dir="ltr" />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label>API Key</Label>
-          <Input
-            type="password"
-            autoComplete="off"
-            dir="ltr"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            placeholder="sk-... / claude-... / AIza..."
-          />
+          <Label>API key</Label>
+          <Input type="password" autoComplete="off" dir="ltr" value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="sk-... / claude-... / AIza..." />
         </div>
 
         {showBaseUrl && (
           <div className="space-y-2">
-            <Label>Base URL (OpenAI-Compatible)</Label>
-            <Input
-              dir="ltr"
-              value={baseUrl}
-              onChange={(e) => setBaseUrl(e.target.value)}
-              placeholder="https://api.example.com/v1"
-            />
+            <Label>Base URL</Label>
+            <Input dir="ltr" value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} placeholder="https://api.example.com/v1" />
           </div>
         )}
 
         <Button type="submit" disabled={saving} className="gap-2">
-          {saving ? (
-            <span className="inline-block h-4 w-4 rounded-full border-2 border-primary-foreground/40 border-t-primary-foreground animate-spin" />
-          ) : saved ? (
-            <CheckCircle2 className="w-4 h-4" />
-          ) : (
-            <Save className="w-4 h-4" />
-          )}
-          {saving ? "שומר..." : saved ? "נשמר" : "שמירת הגדרות"}
+          {saving ? <span className="inline-block h-4 w-4 rounded-full border-2 border-primary-foreground/40 border-t-primary-foreground animate-spin" /> : saved ? <CheckCircle2 className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+          {saving ? "Saving..." : saved ? "Saved" : "Save settings"}
         </Button>
       </form>
 
       <div className="bg-card rounded-2xl border border-border/50 p-6 shadow-sm space-y-3">
-        <h2 className="font-bold text-foreground font-rubik">סטטוס מוכנות</h2>
-        <StatusRow ok={hasApiKey} textOk="מפתח API הוגדר" textMissing="חסר מפתח API" />
-        <StatusRow ok={profileExists} textOk="פרופיל אישי קיים" textMissing="חסר פרופיל אישי" />
+        <h2 className="font-bold text-foreground font-rubik">Readiness</h2>
+        <StatusRow ok={hasApiKey} textOk="API key is configured" textMissing="Missing API key" />
+        <StatusRow ok={profileExists} textOk="Personal profile exists" textMissing="Missing personal profile" />
 
         <div className="flex flex-wrap gap-2 pt-2">
-          <Button asChild variant="outline">
-            <Link to="/calculator">עריכת פרופיל ומחשבון</Link>
-          </Button>
-          <Button asChild>
-            <Link to="/">מעבר לאשף</Link>
-          </Button>
+          <Button asChild variant="outline"><Link to="/calculator">Open calculator</Link></Button>
+          <Button asChild><Link to="/">Open wizard</Link></Button>
         </div>
       </div>
     </div>

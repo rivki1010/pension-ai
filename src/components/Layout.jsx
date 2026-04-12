@@ -4,13 +4,13 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navItems = [
-  { path: "/", label: "חישוב פנסיה", icon: Calculator },
-  { path: "/settings", label: "הגדרות", icon: Settings },
-  { path: "/dashboard", label: "דשבורד", icon: LayoutDashboard },
-  { path: "/documents", label: "מסמכים", icon: FileText },
-  { path: "/investment-comparison", label: "מסלולי השקעה", icon: GitCompare },
-  { path: "/funds-comparison", label: "השוואת קרנות", icon: TrendingUp },
-  { path: "/methodology", label: "שיטת חישוב", icon: BookOpen },
+  { path: "/", label: "Pension Wizard", icon: Calculator },
+  { path: "/settings", label: "AI Settings", icon: Settings },
+  { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { path: "/documents", label: "Documents", icon: FileText },
+  { path: "/investment-comparison", label: "Investment Tracks", icon: GitCompare },
+  { path: "/funds-comparison", label: "Fund Comparison", icon: TrendingUp },
+  { path: "/methodology", label: "Methodology", icon: BookOpen },
 ];
 
 export default function Layout() {
@@ -24,11 +24,11 @@ export default function Layout() {
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg font-rubik">₪</span>
+                <span className="text-primary-foreground font-bold text-lg font-rubik">$</span>
               </div>
               <div>
-                <h1 className="text-lg font-bold text-foreground font-rubik leading-tight">פנסיה חכמה</h1>
-                <p className="text-[10px] text-muted-foreground leading-tight">ניתוח ותחזית פנסיונית</p>
+                <h1 className="text-lg font-bold text-foreground font-rubik leading-tight">Pension AI</h1>
+                <p className="text-[10px] text-muted-foreground leading-tight">Planning and Retirement Projections</p>
               </div>
             </Link>
 

@@ -28,7 +28,6 @@ export default function StepResults({ profile, documents, returnMode, manualRetu
 
     const aggPension = getAggregatedPensionData(documents);
     const annualReturn = returnMode === "auto" ? calculateAverageReturn(documents) : manualReturn;
-
     const startBalance = aggPension?.total_balance || 0;
     const severanceBalance = aggPension?.severance_balance || 0;
     const monthlyDepositGross =
@@ -38,7 +37,6 @@ export default function StepResults({ profile, documents, returnMode, manualRetu
 
     const years = yearsToRetirement(profile.birth_year, profile.retirement_age || 67);
     const currentAge = getCurrentAge(profile.birth_year);
-
     const effectiveStartBalance = includeCompensation ? startBalance : Math.max(0, startBalance - severanceBalance);
 
     const projectedBalance = projectBalanceWithDynamicFeesAndGrowth({
@@ -79,67 +77,43 @@ export default function StepResults({ profile, documents, returnMode, manualRetu
     };
   }, [profile, documents, returnMode, manualReturn, includeCompensation, valueMode]);
 
-  if (!calc) {
-    return <div className="text-center text-muted-foreground py-20">חסרים פרטים לחישוב</div>;
-  }
+  if (!calc) return <div className="text-center text-muted-foreground py-20">Missing details for calculation.</div>;
 
   return (
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-foreground font-rubik">תוצאות החישוב</h2>
-          <p className="text-muted-foreground text-sm">
-            גיל {calc.currentAge} • {calc.years} שנים לפרישה • תשואה שנתית {formatPercent(calc.annualReturn)}
-          </p>
+          <h2 className="text-2xl font-bold text-foreground font-rubik">Projection Results</h2>
+          <p className="text-muted-foreground text-sm">Age {calc.currentAge} | {calc.years} years to retirement | Annual return {formatPercent(calc.annualReturn)}</p>
         </div>
-
-        <Button variant="outline" onClick={onRestart} className="gap-2">
-          <RefreshCw className="w-4 h-4" />
-          חישוב מחדש
-        </Button>
+        <Button variant="outline" onClick={onRestart} className="gap-2"><RefreshCw className="w-4 h-4" />Start Over</Button>
       </motion.div>
 
       <div className="bg-muted/40 rounded-xl p-4 flex flex-wrap items-center gap-4 justify-between">
         <div className="flex items-center gap-2">
-          <Label>תצוגה:</Label>
-          <button
-            type="button"
-            onClick={() => setValueMode("nominal")}
-            className={`px-3 py-1.5 rounded-lg text-sm ${valueMode === "nominal" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"}`}
-          >
-            נומינלי
-          </button>
-          <button
-            type="button"
-            onClick={() => setValueMode("real")}
-            className={`px-3 py-1.5 rounded-lg text-sm ${valueMode === "real" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"}`}
-          >
-            ריאלי
-          </button>
+          <Label>Value mode:</Label>
+          <button type="button" onClick={() => setValueMode("nominal")} className={`px-3 py-1.5 rounded-lg text-sm ${valueMode === "nominal" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"}`}>Nominal</button>
+          <button type="button" onClick={() => setValueMode("real")} className={`px-3 py-1.5 rounded-lg text-sm ${valueMode === "real" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"}`}>Real</button>
         </div>
 
         <div className="flex items-center gap-2">
           <Checkbox id="inc-comp" checked={includeCompensation} onCheckedChange={(v) => setIncludeCompensation(Boolean(v))} />
-          <Label htmlFor="inc-comp">לכלול פיצויים בקצבה</Label>
+          <Label htmlFor="inc-comp">Include severance in pension</Label>
         </div>
       </div>
 
       {!includeCompensation && calc.severanceBalance > 0 && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-          רכיב פיצויים הוסר מהצבירה: {formatCurrency(calc.severanceBalance)}
-        </div>
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">Severance removed from pension base: {formatCurrency(calc.severanceBalance)}</div>
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Card icon={TrendingUp} title="צבירה צפויה בפרישה" value={formatCurrency(calc.projectedBalance)} />
-        <Card icon={Wallet} title="קצבה חודשית נטו" value={formatCurrency(calc.tax.netPension)} subtitle={`ברוטו: ${formatCurrency(calc.monthlyPension)}`} />
+        <Card icon={TrendingUp} title="Projected retirement balance" value={formatCurrency(calc.projectedBalance)} />
+        <Card icon={Wallet} title="Projected net monthly pension" value={formatCurrency(calc.tax.netPension)} subtitle={`Gross: ${formatCurrency(calc.monthlyPension)}`} />
       </div>
 
-      <ProjectionChart data={calc.projectionData} title="תחזית צבירה לאורך השנים" valueMode={valueMode} onValueModeChange={setValueMode} />
+      <ProjectionChart data={calc.projectionData} title="Balance projection over time" valueMode={valueMode} onValueModeChange={setValueMode} />
 
-      <div className="text-xs text-muted-foreground border-t border-border/40 pt-3">
-        תצוגה ריאלית מחסירה אינפלציה שנתית ממוצעת של {formatPercent(DEFAULT_INFLATION_PCT)}.
-      </div>
+      <div className="text-xs text-muted-foreground border-t border-border/40 pt-3">Real mode assumes average annual inflation of {formatPercent(DEFAULT_INFLATION_PCT)}.</div>
     </div>
   );
 }
@@ -147,10 +121,7 @@ export default function StepResults({ profile, documents, returnMode, manualRetu
 function Card({ icon: Icon, title, value, subtitle }) {
   return (
     <div className="bg-card rounded-2xl border border-border/50 p-5 shadow-sm space-y-2">
-      <div className="flex items-center gap-2 text-muted-foreground text-sm">
-        <Icon className="w-4 h-4" />
-        <span>{title}</span>
-      </div>
+      <div className="flex items-center gap-2 text-muted-foreground text-sm"><Icon className="w-4 h-4" /><span>{title}</span></div>
       <p className="text-3xl font-bold text-foreground font-rubik">{value}</p>
       {subtitle ? <p className="text-xs text-muted-foreground">{subtitle}</p> : null}
     </div>
