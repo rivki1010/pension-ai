@@ -11,8 +11,18 @@ function safeJSONParse(text) {
     return JSON.parse(text);
   } catch {
     const match = String(text || "").match(/\{[\s\S]*\}/);
-    if (!match) throw new Error("לא התקבל JSON תקין מהמודל");
+    if (!match) throw new Error("Model did not return valid JSON.");
     return JSON.parse(match[0]);
+  }
+}
+
+async function readResponseBodyOnce(response) {
+  const raw = await response.text();
+  if (!raw) return {};
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return { _raw: raw };
   }
 }
 
@@ -39,16 +49,14 @@ async function callOpenAI({ apiKey, model, prompt }) {
     }),
   });
 
-  const payload = await response.json();
+  const payload = await readResponseBodyOnce(response);
   if (!response.ok) {
     const message = payload?.error?.message || "OpenAI request failed";
-    if (response.status === 401) {
-      throw new Error(`שגיאת הרשאה OpenAI (401): ${message}`);
-    }
+    if (response.status === 401) throw new Error(`OpenAI authorization failed (401): ${message}`);
     throw new Error(message);
   }
 
-  return payload?.choices?.[0]?.message?.content || "";
+  return payload?.choices?.[0]?.message?.content || payload?._raw || "";
 }
 
 async function callAnthropic({ apiKey, model, prompt }) {
@@ -66,7 +74,7 @@ async function callAnthropic({ apiKey, model, prompt }) {
     }),
   });
 
-  const payload = await response.json();
+  const payload = await readResponseBodyOnce(response);
   if (!response.ok) {
     throw new Error(payload?.error?.message || "Anthropic request failed");
   }
@@ -91,7 +99,7 @@ async function callGoogleGemini({ apiKey, model, prompt }) {
     }),
   });
 
-  const payload = await response.json();
+  const payload = await readResponseBodyOnce(response);
   if (!response.ok) {
     throw new Error(payload?.error?.message || "Gemini request failed");
   }
@@ -109,7 +117,7 @@ async function callOpenAICompatible({ provider, apiKey, model, baseUrl, prompt }
   else endpoint = `${baseUrl.replace(/\/$/, "")}/chat/completions`;
 
   if (!endpoint) {
-    throw new Error("Missing compatible provider endpoint (Base URL)");
+    throw new Error("Missing compatible provider endpoint (Base URL).");
   }
 
   const response = await fetch(endpoint, {
@@ -127,30 +135,23 @@ async function callOpenAICompatible({ provider, apiKey, model, baseUrl, prompt }
     }),
   });
 
-  const payload = await response.json();
+  const payload = await readResponseBodyOnce(response);
   if (!response.ok) {
     throw new Error(payload?.error?.message || "Compatible provider request failed");
   }
 
-  return payload?.choices?.[0]?.message?.content || "";
+  return payload?.choices?.[0]?.message?.content || payload?._raw || "";
 }
 
 async function callModelWithProvider(prompt) {
   const { provider, apiKey, model, baseUrl } = getAISettings();
   if (!apiKey) {
-    throw new Error("לא נמצא מפתח API. הוסף מפתח במסך ההגדרות או בשלב הפרטים האישיים.");
+    throw new Error("Missing API key. Add your key in Settings or Personal Details step.");
   }
 
-  if (provider === "openai") {
-    return callOpenAI({ apiKey, model, prompt });
-  }
-  if (provider === "anthropic") {
-    return callAnthropic({ apiKey, model, prompt });
-  }
-  if (provider === "google") {
-    return callGoogleGemini({ apiKey, model, prompt });
-  }
-
+  if (provider === "openai") return callOpenAI({ apiKey, model, prompt });
+  if (provider === "anthropic") return callAnthropic({ apiKey, model, prompt });
+  if (provider === "google") return callGoogleGemini({ apiKey, model, prompt });
   return callOpenAICompatible({ provider, apiKey, model, baseUrl, prompt });
 }
 
