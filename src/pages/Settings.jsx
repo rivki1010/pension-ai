@@ -57,6 +57,8 @@ export default function Settings() {
     setStoredAIKey(apiKey.trim());
     setStoredAIModel(model.trim() || defaultModelForProvider(provider));
     setStoredAIBaseUrl(baseUrl.trim());
+    localStorage.setItem("openai_api_key", apiKey.trim());
+    localStorage.setItem("openai_model", model.trim() || defaultModelForProvider(provider));
     await checkAppState();
     await loadProfileStatus();
     setSaving(false);

@@ -1,11 +1,34 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileText, Shield, GraduationCap, Trash2, Loader2, Calendar, TrendingUp, Wallet, AlertCircle } from "lucide-react";
+import {
+  FileText,
+  Shield,
+  GraduationCap,
+  Trash2,
+  Loader2,
+  Calendar,
+  TrendingUp,
+  Wallet,
+  AlertCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatPercent } from "../lib/pensionCalculations";
+import { getJson, setJson, STORAGE_KEYS } from "../lib/localStore";
+
+function getStoredDocuments() {
+  const primary = getJson("pension_documents", []);
+  if (Array.isArray(primary) && primary.length > 0) return primary;
+
+  const fallback = getJson(STORAGE_KEYS.PENSION_DOCUMENTS, []);
+  return Array.isArray(fallback) ? fallback : [];
+}
+
+function persistDocuments(documents) {
+  setJson("pension_documents", documents);
+  setJson(STORAGE_KEYS.PENSION_DOCUMENTS, documents);
+}
 
 export default function Documents() {
   const [documents, setDocuments] = useState([]);
@@ -13,19 +36,16 @@ export default function Documents() {
   const [deleting, setDeleting] = useState(null);
 
   useEffect(() => {
-    loadDocuments();
-  }, []);
-
-  const loadDocuments = async () => {
-    const docs = await base44.entities.PensionDocument.list("-created_date");
+    const docs = getStoredDocuments();
     setDocuments(docs);
     setLoading(false);
-  };
+  }, []);
 
   const handleDelete = async (id) => {
     setDeleting(id);
-    await base44.entities.PensionDocument.delete(id);
-    setDocuments(prev => prev.filter(d => d.id !== id));
+    const updated = documents.filter((d) => d.id !== id);
+    setDocuments(updated);
+    persistDocuments(updated);
     setDeleting(null);
   };
 
@@ -37,8 +57,8 @@ export default function Documents() {
     );
   }
 
-  const pensionDocs = documents.filter(d => d.document_type === "pension");
-  const eduDocs = documents.filter(d => d.document_type === "education_fund");
+  const pensionDocs = documents.filter((d) => d.document_type === "pension");
+  const eduDocs = documents.filter((d) => d.document_type === "education_fund");
 
   return (
     <div className="space-y-8">
@@ -47,9 +67,9 @@ export default function Documents() {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-2"
       >
-        <h1 className="text-3xl font-bold text-foreground font-rubik">המסמכים שלי</h1>
+        <h1 className="text-3xl font-bold text-foreground font-rubik">My Documents</h1>
         <p className="text-muted-foreground">
-          {documents.length} מסמכים הועלו • {pensionDocs.length} פנסיה • {eduDocs.length} קרן השתלמות
+          {documents.length} uploaded documents • {pensionDocs.length} pension • {eduDocs.length} education fund
         </p>
       </motion.div>
 
@@ -59,7 +79,7 @@ export default function Documents() {
         <div className="space-y-6">
           {pensionDocs.length > 0 && (
             <DocumentSection
-              title="פנסיה"
+              title="Pension"
               icon={Shield}
               documents={pensionDocs}
               onDelete={handleDelete}
@@ -68,7 +88,7 @@ export default function Documents() {
           )}
           {eduDocs.length > 0 && (
             <DocumentSection
-              title="קרן השתלמות"
+              title="Education Fund"
               icon={GraduationCap}
               documents={eduDocs}
               onDelete={handleDelete}
@@ -137,25 +157,25 @@ function DocumentCard({ doc, index, onDelete, isDeleting }) {
           </div>
 
           {isError ? (
-            <p className="text-sm text-red-500">{doc.extraction_notes || "שגיאה בחילוץ נתונים"}</p>
+            <p className="text-sm text-red-500">{doc.extraction_notes || "Data extraction failed"}</p>
           ) : (
             <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted-foreground">
               {doc.year && (
                 <span className="flex items-center gap-1">
                   <Calendar className="w-3.5 h-3.5" />
-                  שנת {doc.year}
+                  Year {doc.year}
                 </span>
               )}
               {doc.total_balance != null && (
                 <span className="flex items-center gap-1">
                   <Wallet className="w-3.5 h-3.5" />
-                  יתרה: {formatCurrency(doc.total_balance)}
+                  Balance: {formatCurrency(doc.total_balance)}
                 </span>
               )}
               {doc.annual_return_pct != null && (
                 <span className="flex items-center gap-1">
                   <TrendingUp className="w-3.5 h-3.5" />
-                  תשואה: {formatPercent(doc.annual_return_pct)}
+                  Return: {formatPercent(doc.annual_return_pct)}
                 </span>
               )}
             </div>
@@ -191,11 +211,11 @@ function EmptyDocuments() {
         <FileText className="w-10 h-10 text-muted-foreground" />
       </div>
       <div className="space-y-1">
-        <h3 className="text-lg font-semibold text-foreground">אין מסמכים עדיין</h3>
-        <p className="text-sm text-muted-foreground">העלה את דוחות הפנסיה והקרן השתלמות שלך</p>
+        <h3 className="text-lg font-semibold text-foreground">No documents yet</h3>
+        <p className="text-sm text-muted-foreground">Upload your pension and education fund reports to get started.</p>
       </div>
       <Button asChild>
-        <Link to="/upload">העלה מסמכים</Link>
+        <Link to="/upload">Upload Documents</Link>
       </Button>
     </motion.div>
   );

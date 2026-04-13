@@ -33,7 +33,14 @@ export default function PensionWizard() {
     ]);
 
     if (profiles[0]) setProfile(profiles[0]);
-    setDocuments(docs);
+    const localDocs = (() => {
+      try {
+        return JSON.parse(localStorage.getItem("pension_documents") || "[]");
+      } catch {
+        return [];
+      }
+    })();
+    setDocuments(localDocs.length > 0 ? localDocs : docs);
     setLoading(false);
   };
 

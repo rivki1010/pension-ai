@@ -53,6 +53,8 @@ export default function StepPersonalDetails({ initialProfile, onNext }) {
     setStoredAIKey(apiKey.trim());
     setStoredAIModel(model.trim() || defaultModelForProvider(provider));
     setStoredAIBaseUrl(baseUrl.trim());
+    localStorage.setItem("openai_api_key", apiKey.trim());
+    localStorage.setItem("openai_model", model.trim() || defaultModelForProvider(provider));
 
     const data = {
       birth_year: Number(form.birth_year),
