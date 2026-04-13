@@ -4,13 +4,13 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navItems = [
-  { path: "/", label: "Pension Wizard", icon: Calculator },
-  { path: "/settings", label: "AI Settings", icon: Settings },
-  { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { path: "/documents", label: "Documents", icon: FileText },
-  { path: "/investment-comparison", label: "Investment Tracks", icon: GitCompare },
-  { path: "/funds-comparison", label: "Fund Comparison", icon: TrendingUp },
-  { path: "/methodology", label: "Methodology", icon: BookOpen },
+  { path: "/", label: "אשף פנסיה", icon: Calculator },
+  { path: "/settings", label: "הגדרות AI", icon: Settings },
+  { path: "/dashboard", label: "לוח בקרה", icon: LayoutDashboard },
+  { path: "/documents", label: "המסמכים שלי", icon: FileText },
+  { path: "/investment-comparison", label: "מסלולי השקעה", icon: GitCompare },
+  { path: "/funds-comparison", label: "השוואת קרנות", icon: TrendingUp },
+  { path: "/methodology", label: "מתודולוגיה", icon: BookOpen },
 ];
 
 export default function Layout() {
@@ -27,8 +27,8 @@ export default function Layout() {
                 <span className="text-primary-foreground font-bold text-lg font-rubik">$</span>
               </div>
               <div>
-                <h1 className="text-lg font-bold text-foreground font-rubik leading-tight">Pension AI</h1>
-                <p className="text-[10px] text-muted-foreground leading-tight">Planning and Retirement Projections</p>
+                <h1 className="text-lg font-bold text-foreground font-rubik leading-tight">פנסיה AI</h1>
+                <p className="text-[10px] text-muted-foreground leading-tight">תכנון ותחזיות לפרישה</p>
               </div>
             </Link>
 

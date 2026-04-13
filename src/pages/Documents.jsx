@@ -67,9 +67,9 @@ export default function Documents() {
         animate={{ opacity: 1, y: 0 }}
         className="space-y-2"
       >
-        <h1 className="text-3xl font-bold text-foreground font-rubik">My Documents</h1>
+        <h1 className="text-3xl font-bold text-foreground font-rubik">המסמכים שלי</h1>
         <p className="text-muted-foreground">
-          {documents.length} uploaded documents • {pensionDocs.length} pension • {eduDocs.length} education fund
+          {documents.length} מסמכים הועלו • {pensionDocs.length} פנסיה • {eduDocs.length} קרן השתלמות
         </p>
       </motion.div>
 
@@ -79,7 +79,7 @@ export default function Documents() {
         <div className="space-y-6">
           {pensionDocs.length > 0 && (
             <DocumentSection
-              title="Pension"
+              title="פנסיה"
               icon={Shield}
               documents={pensionDocs}
               onDelete={handleDelete}
@@ -88,7 +88,7 @@ export default function Documents() {
           )}
           {eduDocs.length > 0 && (
             <DocumentSection
-              title="Education Fund"
+              title="קרן השתלמות"
               icon={GraduationCap}
               documents={eduDocs}
               onDelete={handleDelete}
@@ -157,25 +157,25 @@ function DocumentCard({ doc, index, onDelete, isDeleting }) {
           </div>
 
           {isError ? (
-            <p className="text-sm text-red-500">{doc.extraction_notes || "Data extraction failed"}</p>
+            <p className="text-sm text-red-500">{doc.extraction_notes || "חילוץ הנתונים נכשל"}</p>
           ) : (
             <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-muted-foreground">
               {doc.year && (
                 <span className="flex items-center gap-1">
                   <Calendar className="w-3.5 h-3.5" />
-                  Year {doc.year}
+                  שנת {doc.year}
                 </span>
               )}
               {doc.total_balance != null && (
                 <span className="flex items-center gap-1">
                   <Wallet className="w-3.5 h-3.5" />
-                  Balance: {formatCurrency(doc.total_balance)}
+                  יתרה: {formatCurrency(doc.total_balance)}
                 </span>
               )}
               {doc.annual_return_pct != null && (
                 <span className="flex items-center gap-1">
                   <TrendingUp className="w-3.5 h-3.5" />
-                  Return: {formatPercent(doc.annual_return_pct)}
+                  תשואה: {formatPercent(doc.annual_return_pct)}
                 </span>
               )}
             </div>
@@ -211,11 +211,11 @@ function EmptyDocuments() {
         <FileText className="w-10 h-10 text-muted-foreground" />
       </div>
       <div className="space-y-1">
-        <h3 className="text-lg font-semibold text-foreground">No documents yet</h3>
-        <p className="text-sm text-muted-foreground">Upload your pension and education fund reports to get started.</p>
+        <h3 className="text-lg font-semibold text-foreground">אין מסמכים עדיין</h3>
+        <p className="text-sm text-muted-foreground">העלה את דוחות הפנסיה והקרן השתלמות שלך כדי להתחיל.</p>
       </div>
       <Button asChild>
-        <Link to="/upload">Upload Documents</Link>
+        <Link to="/upload">העלה מסמכים</Link>
       </Button>
     </motion.div>
   );

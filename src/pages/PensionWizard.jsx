@@ -8,10 +8,10 @@ import StepReturnRate from "../components/wizard/StepReturnRate";
 import StepResults from "../components/wizard/StepResults";
 
 const STEPS = [
-  { number: 1, label: "Personal + API" },
-  { number: 2, label: "Upload Documents" },
-  { number: 3, label: "Return Assumptions" },
-  { number: 4, label: "Results" },
+  { number: 1, label: "פרטים אישיים + API" },
+  { number: 2, label: "העלאת מסמכים" },
+  { number: 3, label: "הנחות תשואה" },
+  { number: 4, label: "תוצאות" },
 ];
 
 export default function PensionWizard() {

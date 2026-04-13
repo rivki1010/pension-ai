@@ -51,12 +51,12 @@ function FileUploadZone({ documentType, onProcessed }) {
       setFiles((prev) => prev.map((f) => (f.id === fileId ? { ...f, status: "extracting" } : f)));
 
       if (file.type !== "application/pdf") {
-        throw new Error("Standalone mode currently supports PDF files only.");
+        throw new Error("בגרסה העצמאית נתמכים כרגע קובצי PDF בלבד.");
       }
 
       const text = await extractTextFromPDF(file);
       if (!text.trim()) {
-        throw new Error("Could not extract text from PDF.");
+        throw new Error("לא הצלחתי לחלץ טקסט מה-PDF.");
       }
 
       const extractedData = await extractDataWithAI(text, documentType);
@@ -73,9 +73,9 @@ function FileUploadZone({ documentType, onProcessed }) {
       setFiles((prev) => prev.map((f) => (f.id === fileId ? { ...f, status: "done", doc } : f)));
       onProcessed(doc);
     } catch (error) {
-      const message = error?.message || "Failed to process file";
+      const message = error?.message || "העיבוד נכשל";
       setFiles((prev) => prev.map((f) => (f.id === fileId ? { ...f, status: "error", error: message } : f)));
-      alert(`File processing error: ${message}`);
+      alert(`שגיאה בעיבוד הקובץ: ${message}`);
     }
   };
 
@@ -97,10 +97,10 @@ function FileUploadZone({ documentType, onProcessed }) {
     error: AlertCircle,
   };
   const statusText = {
-    uploading: "Reading file...",
-    extracting: "Extracting with AI...",
-    done: "Done",
-    error: "Error",
+    uploading: "קורא קובץ...",
+    extracting: "מחלץ נתונים עם AI...",
+    done: "הושלם",
+    error: "שגיאה",
   };
   const statusColor = {
     uploading: "text-primary",
@@ -128,7 +128,7 @@ function FileUploadZone({ documentType, onProcessed }) {
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
         />
         <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-        <p className="text-sm font-medium text-foreground">Drop PDF files or click to select</p>
+        <p className="text-sm font-medium text-foreground">גרור קובצי PDF או לחץ לבחירה</p>
       </div>
 
       <AnimatePresence>
@@ -182,8 +182,8 @@ export default function StepDocuments({ initialDocuments, onNext, onBack }) {
           <Upload className="w-6 h-6 text-primary" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-foreground font-rubik">Upload Documents</h2>
-          <p className="text-muted-foreground text-sm">Read PDF locally and extract data with your own API key.</p>
+          <h2 className="text-2xl font-bold text-foreground font-rubik">העלאת מסמכים</h2>
+          <p className="text-muted-foreground text-sm">קריאה מקומית של PDF וחילוץ נתונים עם מפתח ה-API האישי שלך.</p>
         </div>
       </div>
 
@@ -191,7 +191,7 @@ export default function StepDocuments({ initialDocuments, onNext, onBack }) {
         <div className="bg-card rounded-2xl border border-border/50 p-5 shadow-sm space-y-4">
           <div className="flex items-center gap-2">
             <Shield className="w-4 h-4 text-primary" />
-            <h3 className="font-semibold text-foreground">Pension ({pensionDocs.length} files)</h3>
+            <h3 className="font-semibold text-foreground">פנסיה ({pensionDocs.length} קבצים)</h3>
           </div>
           <FileUploadZone documentType="pension" onProcessed={addDoc} />
         </div>
@@ -199,7 +199,7 @@ export default function StepDocuments({ initialDocuments, onNext, onBack }) {
         <div className="bg-card rounded-2xl border border-border/50 p-5 shadow-sm space-y-4">
           <div className="flex items-center gap-2">
             <GraduationCap className="w-4 h-4 text-amber-500" />
-            <h3 className="font-semibold text-foreground">Education Fund ({eduDocs.length} files)</h3>
+            <h3 className="font-semibold text-foreground">קרן השתלמות ({eduDocs.length} קבצים)</h3>
           </div>
           <FileUploadZone documentType="education_fund" onProcessed={addDoc} />
         </div>
@@ -207,14 +207,14 @@ export default function StepDocuments({ initialDocuments, onNext, onBack }) {
 
       {documents.length > 0 && (
         <div className="bg-muted/40 rounded-xl p-4 space-y-2">
-          <p className="text-sm font-semibold text-foreground">{documents.length} documents uploaded:</p>
+          <p className="text-sm font-semibold text-foreground">{documents.length} מסמכים הועלו:</p>
           <div className="space-y-1">
             {documents.map((d, i) => (
               <div key={`${d.id || d.file_name}_${i}`} className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>{d.file_name}</span>
                 <div className="flex gap-4">
-                  {d.total_balance != null && <span>Balance: {formatCurrency(d.total_balance)}</span>}
-                  {d.annual_return_pct != null && <span className="text-emerald-600">Return: {formatPercent(d.annual_return_pct)}</span>}
+                  {d.total_balance != null && <span>יתרה: {formatCurrency(d.total_balance)}</span>}
+                  {d.annual_return_pct != null && <span className="text-emerald-600">תשואה: {formatPercent(d.annual_return_pct)}</span>}
                 </div>
               </div>
             ))}
@@ -225,21 +225,21 @@ export default function StepDocuments({ initialDocuments, onNext, onBack }) {
       <div className="flex justify-between items-center pt-2">
         <Button variant="outline" onClick={onBack} className="gap-2">
           <ArrowRight className="w-4 h-4" />
-          Back
+          חזרה
         </Button>
 
         <div className="flex gap-2">
           {documents.length === 0 && (
             <Button variant="ghost" onClick={() => onNext([])} className="gap-2 text-muted-foreground">
               <SkipForward className="w-4 h-4" />
-              Skip (manual)
+              דילוג (הזנה ידנית)
             </Button>
           )}
 
           {documents.length > 0 && (
             <Button onClick={() => onNext(documents)} size="lg" className="gap-2">
               <ArrowLeft className="w-4 h-4" />
-              Continue
+              המשך
             </Button>
           )}
         </div>

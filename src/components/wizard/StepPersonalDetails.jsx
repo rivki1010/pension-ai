@@ -80,8 +80,8 @@ export default function StepPersonalDetails({ initialProfile, onNext }) {
           <User className="w-6 h-6 text-primary" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-foreground font-rubik">Personal Details + AI Setup</h2>
-          <p className="text-muted-foreground text-sm">Set your profile and API provider in one step.</p>
+          <h2 className="text-2xl font-bold text-foreground font-rubik">פרטים אישיים + הגדרות AI</h2>
+          <p className="text-muted-foreground text-sm">הגדרת פרופיל אישי וספק AI בשלב אחד.</p>
         </div>
       </div>
 
@@ -89,12 +89,12 @@ export default function StepPersonalDetails({ initialProfile, onNext }) {
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <KeyRound className="w-4 h-4 text-primary" />
-            <h3 className="font-semibold text-foreground">AI Provider Settings</h3>
+            <h3 className="font-semibold text-foreground">הגדרות ספק AI</h3>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>AI Provider</Label>
+              <Label>ספק AI</Label>
               <Select value={provider} onValueChange={handleProviderChange}>
                 <SelectTrigger>
                   <SelectValue />
@@ -108,13 +108,13 @@ export default function StepPersonalDetails({ initialProfile, onNext }) {
             </div>
 
             <div className="space-y-2">
-              <Label>Model</Label>
+              <Label>מודל</Label>
               <Input value={model} onChange={(e) => setModel(e.target.value)} dir="ltr" />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label>API Key</Label>
+            <Label>מפתח API</Label>
             <Input
               type="password"
               dir="ltr"
@@ -128,7 +128,7 @@ export default function StepPersonalDetails({ initialProfile, onNext }) {
 
           {showBaseUrl && (
             <div className="space-y-2">
-              <Label>Base URL (OpenAI-Compatible)</Label>
+              <Label>כתובת בסיס (תואם OpenAI)</Label>
               <Input
                 dir="ltr"
                 value={baseUrl}
@@ -142,45 +142,45 @@ export default function StepPersonalDetails({ initialProfile, onNext }) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 border-t border-border/50 pt-6">
           <div className="space-y-2">
-            <Label>Birth Year *</Label>
+            <Label>שנת לידה *</Label>
             <Input type="number" placeholder="1985" value={form.birth_year} onChange={(e) => field("birth_year", e.target.value)} required />
           </div>
 
           <div className="space-y-2">
-            <Label>Gender *</Label>
+            <Label>מגדר *</Label>
             <Select value={form.gender} onValueChange={(v) => field("gender", v)} required>
-              <SelectTrigger><SelectValue placeholder="Select gender" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder="בחר מגדר" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="male">Male</SelectItem>
-                <SelectItem value="female">Female</SelectItem>
+                <SelectItem value="male">גבר</SelectItem>
+                <SelectItem value="female">אישה</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <Label>Current Monthly Salary (ILS) *</Label>
+            <Label>שכר חודשי נוכחי (₪) *</Label>
             <Input type="number" placeholder="15000" value={form.current_salary} onChange={(e) => field("current_salary", e.target.value)} required />
           </div>
 
           <div className="space-y-2">
-            <Label>Planned Retirement Age</Label>
+            <Label>גיל פרישה מתוכנן</Label>
             <Input type="number" placeholder={form.gender === "female" ? "65" : "67"} value={form.retirement_age} onChange={(e) => field("retirement_age", e.target.value)} />
-            <p className="text-xs text-muted-foreground">Default: male 67, female 65</p>
+            <p className="text-xs text-muted-foreground">ברירת מחדל: גבר 67, אישה 65</p>
           </div>
 
           <div className="space-y-2">
-            <Label>Marital Status</Label>
+            <Label>מצב משפחתי</Label>
             <Select value={form.marital_status} onValueChange={(v) => field("marital_status", v)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="single">Single</SelectItem>
-                <SelectItem value="married">Married</SelectItem>
+                <SelectItem value="single">רווק/ה</SelectItem>
+                <SelectItem value="married">נשוי/אה</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
-            <Label>Expected Annual Salary Growth (%)</Label>
+            <Label>צפי עליית שכר שנתית (%)</Label>
             <Input type="number" step="0.1" placeholder="2" value={form.salary_growth_pct} onChange={(e) => field("salary_growth_pct", e.target.value)} />
           </div>
         </div>
@@ -188,7 +188,7 @@ export default function StepPersonalDetails({ initialProfile, onNext }) {
         <div className="flex justify-start pt-2">
           <Button type="submit" disabled={saving || !form.birth_year || !form.gender || !form.current_salary || !apiKey.trim()} size="lg" className="gap-2">
             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowLeft className="w-4 h-4" />}
-            Continue
+            המשך
           </Button>
         </div>
       </form>

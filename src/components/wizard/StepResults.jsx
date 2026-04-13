@@ -77,43 +77,43 @@ export default function StepResults({ profile, documents, returnMode, manualRetu
     };
   }, [profile, documents, returnMode, manualReturn, includeCompensation, valueMode]);
 
-  if (!calc) return <div className="text-center text-muted-foreground py-20">Missing details for calculation.</div>;
+  if (!calc) return <div className="text-center text-muted-foreground py-20">חסרים נתונים לחישוב.</div>;
 
   return (
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-foreground font-rubik">Projection Results</h2>
-          <p className="text-muted-foreground text-sm">Age {calc.currentAge} | {calc.years} years to retirement | Annual return {formatPercent(calc.annualReturn)}</p>
+          <h2 className="text-2xl font-bold text-foreground font-rubik">תוצאות התחזית</h2>
+          <p className="text-muted-foreground text-sm">גיל {calc.currentAge} | עוד {calc.years} שנים לפרישה | תשואה שנתית {formatPercent(calc.annualReturn)}</p>
         </div>
-        <Button variant="outline" onClick={onRestart} className="gap-2"><RefreshCw className="w-4 h-4" />Start Over</Button>
+        <Button variant="outline" onClick={onRestart} className="gap-2"><RefreshCw className="w-4 h-4" />התחל מחדש</Button>
       </motion.div>
 
       <div className="bg-muted/40 rounded-xl p-4 flex flex-wrap items-center gap-4 justify-between">
         <div className="flex items-center gap-2">
-          <Label>Value mode:</Label>
-          <button type="button" onClick={() => setValueMode("nominal")} className={`px-3 py-1.5 rounded-lg text-sm ${valueMode === "nominal" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"}`}>Nominal</button>
-          <button type="button" onClick={() => setValueMode("real")} className={`px-3 py-1.5 rounded-lg text-sm ${valueMode === "real" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"}`}>Real</button>
+          <Label>תצוגת ערכים:</Label>
+          <button type="button" onClick={() => setValueMode("nominal")} className={`px-3 py-1.5 rounded-lg text-sm ${valueMode === "nominal" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"}`}>נומינלי</button>
+          <button type="button" onClick={() => setValueMode("real")} className={`px-3 py-1.5 rounded-lg text-sm ${valueMode === "real" ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"}`}>ריאלי</button>
         </div>
 
         <div className="flex items-center gap-2">
           <Checkbox id="inc-comp" checked={includeCompensation} onCheckedChange={(v) => setIncludeCompensation(Boolean(v))} />
-          <Label htmlFor="inc-comp">Include severance in pension</Label>
+          <Label htmlFor="inc-comp">לכלול פיצויים בקצבה</Label>
         </div>
       </div>
 
       {!includeCompensation && calc.severanceBalance > 0 && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">Severance removed from pension base: {formatCurrency(calc.severanceBalance)}</div>
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">רכיב הפיצויים הוסר מבסיס הקצבה: {formatCurrency(calc.severanceBalance)}</div>
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Card icon={TrendingUp} title="Projected retirement balance" value={formatCurrency(calc.projectedBalance)} />
-        <Card icon={Wallet} title="Projected net monthly pension" value={formatCurrency(calc.tax.netPension)} subtitle={`Gross: ${formatCurrency(calc.monthlyPension)}`} />
+        <Card icon={TrendingUp} title="צבירה צפויה בפרישה" value={formatCurrency(calc.projectedBalance)} />
+        <Card icon={Wallet} title="קצבה חודשית נטו צפויה" value={formatCurrency(calc.tax.netPension)} subtitle={`ברוטו: ${formatCurrency(calc.monthlyPension)}`} />
       </div>
 
-      <ProjectionChart data={calc.projectionData} title="Balance projection over time" valueMode={valueMode} onValueModeChange={setValueMode} />
+      <ProjectionChart data={calc.projectionData} title="תחזית צבירה לאורך זמן" valueMode={valueMode} onValueModeChange={setValueMode} />
 
-      <div className="text-xs text-muted-foreground border-t border-border/40 pt-3">Real mode assumes average annual inflation of {formatPercent(DEFAULT_INFLATION_PCT)}.</div>
+      <div className="text-xs text-muted-foreground border-t border-border/40 pt-3">בתצוגה ריאלית מחושבת אינפלציה שנתית ממוצעת של {formatPercent(DEFAULT_INFLATION_PCT)}.</div>
     </div>
   );
 }

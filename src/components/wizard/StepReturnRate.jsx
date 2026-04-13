@@ -20,8 +20,8 @@ export default function StepReturnRate({ documents, onNext, onBack }) {
       <div className="flex items-center gap-3">
         <div className="p-3 rounded-2xl bg-primary/10"><TrendingUp className="w-6 h-6 text-primary" /></div>
         <div>
-          <h2 className="text-2xl font-bold text-foreground font-rubik">Choose Expected Return</h2>
-          <p className="text-muted-foreground text-sm">Use historical returns from your files or set a manual assumption.</p>
+          <h2 className="text-2xl font-bold text-foreground font-rubik">בחירת תשואה צפויה</h2>
+          <p className="text-muted-foreground text-sm">אפשר להשתמש בתשואות מהמסמכים או להגדיר הנחה ידנית.</p>
         </div>
       </div>
 
@@ -41,14 +41,14 @@ export default function StepReturnRate({ documents, onNext, onBack }) {
             <TrendingUp className={`w-6 h-6 ${mode === "auto" ? "text-primary" : "text-muted-foreground"}`} />
           </div>
           <div>
-            <p className="font-bold text-foreground text-lg">Auto From Documents</p>
+            <p className="font-bold text-foreground text-lg">אוטומטי מהמסמכים</p>
             <p className="text-sm text-muted-foreground mt-1">
-              {documents.length > 0 ? `Based on ${documents.filter((d) => d.annual_return_pct).length} documents` : "No documents uploaded"}
+              {documents.length > 0 ? `מבוסס על ${documents.filter((d) => d.annual_return_pct).length} מסמכים` : "לא הועלו מסמכים"}
             </p>
           </div>
           <div className="p-3 rounded-xl bg-primary/10">
             <p className="text-2xl font-bold text-primary font-rubik">{formatPercent(avgFromDocs)}</p>
-            <p className="text-xs text-muted-foreground">Real: {formatPercent(Math.max(0, avgFromDocs - INFLATION_AVG))}</p>
+            <p className="text-xs text-muted-foreground">ריאלי: {formatPercent(Math.max(0, avgFromDocs - INFLATION_AVG))}</p>
           </div>
         </button>
 
@@ -66,15 +66,15 @@ export default function StepReturnRate({ documents, onNext, onBack }) {
             <Sliders className={`w-6 h-6 ${mode === "manual" ? "text-primary" : "text-muted-foreground"}`} />
           </div>
           <div>
-            <p className="font-bold text-foreground text-lg">Manual Assumption</p>
-            <p className="text-sm text-muted-foreground mt-1">Set your own annual return estimate.</p>
+            <p className="font-bold text-foreground text-lg">הנחה ידנית</p>
+            <p className="text-sm text-muted-foreground mt-1">הזן הערכת תשואה שנתית משלך.</p>
           </div>
 
           {mode === "manual" && (
             <div className="space-y-3 pt-1">
               <div className="p-3 rounded-xl bg-primary/10">
                 <p className="text-2xl font-bold text-primary font-rubik">{formatPercent(manualValue)}</p>
-                <p className="text-xs text-muted-foreground">Real: {formatPercent(Math.max(0, manualValue - INFLATION_AVG))}</p>
+                <p className="text-xs text-muted-foreground">ריאלי: {formatPercent(Math.max(0, manualValue - INFLATION_AVG))}</p>
               </div>
               <Slider value={[manualValue]} min={0} max={15} step={0.1} onValueChange={([v]) => setManualValue(v)} />
             </div>
@@ -83,8 +83,8 @@ export default function StepReturnRate({ documents, onNext, onBack }) {
       </div>
 
       <div className="flex justify-between items-center pt-2">
-        <Button variant="outline" onClick={onBack} className="gap-2"><ArrowRight className="w-4 h-4" />Back</Button>
-        <Button onClick={() => onNext({ mode, value: effectiveReturn, realReturn })} size="lg" className="gap-2"><ArrowLeft className="w-4 h-4" />Calculate</Button>
+        <Button variant="outline" onClick={onBack} className="gap-2"><ArrowRight className="w-4 h-4" />חזרה</Button>
+        <Button onClick={() => onNext({ mode, value: effectiveReturn, realReturn })} size="lg" className="gap-2"><ArrowLeft className="w-4 h-4" />חשב</Button>
       </div>
     </motion.div>
   );
