@@ -3,6 +3,7 @@ import {
   getStoredAIKey,
   getStoredAIModel,
   getStoredAIProvider,
+  setStoredAIModel,
 } from "@/api/base44Client";
 import { defaultModelForProvider } from "@/lib/aiProviders";
 
@@ -33,7 +34,15 @@ function getAISettings() {
       ? (window.localStorage.getItem("gemini_api_key") || "").trim()
       : "";
   const apiKey = (getStoredAIKey() || googleFallbackKey || "").trim();
-  const model = (getStoredAIModel() || defaultModelForProvider(provider)).trim();
+  let model = (getStoredAIModel() || defaultModelForProvider(provider)).trim();
+  if (provider === "google") {
+    const lower = model.toLowerCase();
+    // Auto-migrate stale/unsupported Gemini model names kept in localStorage.
+    if (!lower || lower.includes("gemini-2.5") || lower.includes("gemini-2.0")) {
+      model = "gemini-3-flash-preview";
+      setStoredAIModel(model);
+    }
+  }
   const baseUrl = (getStoredAIBaseUrl() || "").trim();
   return { provider, apiKey, model, baseUrl };
 }
