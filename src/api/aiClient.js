@@ -28,7 +28,11 @@ async function readResponseBodyOnce(response) {
 
 function getAISettings() {
   const provider = getStoredAIProvider() || "openai";
-  const apiKey = (getStoredAIKey() || "").trim();
+  const googleFallbackKey =
+    provider === "google" && typeof window !== "undefined"
+      ? (window.localStorage.getItem("gemini_api_key") || "").trim()
+      : "";
+  const apiKey = (getStoredAIKey() || googleFallbackKey || "").trim();
   const model = (getStoredAIModel() || defaultModelForProvider(provider)).trim();
   const baseUrl = (getStoredAIBaseUrl() || "").trim();
   return { provider, apiKey, model, baseUrl };
@@ -86,8 +90,9 @@ async function callAnthropic({ apiKey, model, prompt }) {
 }
 
 async function callGoogleGemini({ apiKey, model, prompt }) {
+  const selectedModel = model || "gemini-3-flash-preview";
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
-    model
+    selectedModel
   )}:generateContent?key=${encodeURIComponent(apiKey)}`;
 
   const response = await fetch(endpoint, {
@@ -95,7 +100,10 @@ async function callGoogleGemini({ apiKey, model, prompt }) {
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
       contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.1 },
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: 0.1,
+      },
     }),
   });
 

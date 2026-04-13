@@ -43,7 +43,7 @@ function FileUploadZone({ documentType, onProcessed }) {
   const [files, setFiles] = useState([]);
   const [dragActive, setDragActive] = useState(false);
 
-  const processFile = async (file) => {
+  const processFile = useCallback(async (file) => {
     const fileId = Date.now() + Math.random();
     setFiles((prev) => [...prev, { id: fileId, name: file.name, status: "uploading" }]);
 
@@ -77,13 +77,23 @@ function FileUploadZone({ documentType, onProcessed }) {
       setFiles((prev) => prev.map((f) => (f.id === fileId ? { ...f, status: "error", error: message } : f)));
       alert(`שגיאה בעיבוד הקובץ: ${message}`);
     }
-  };
+  }, [onProcessed]);
+
+  const handleFiles = useCallback(async (fileList) => {
+    setDragActive(false);
+    const filesArray = Array.from(fileList || []);
+    for (let i = 0; i < filesArray.length; i++) {
+      await processFile(filesArray[i]);
+      if (filesArray.length > 1 && i < filesArray.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 2500));
+      }
+    }
+  }, [processFile]);
 
   const handleDrop = useCallback((e) => {
     e.preventDefault();
-    setDragActive(false);
-    Array.from(e.dataTransfer.files || []).forEach(processFile);
-  }, []);
+    handleFiles(e.dataTransfer.files);
+  }, [handleFiles]);
 
   const handleDrag = useCallback((e) => {
     e.preventDefault();
@@ -124,7 +134,7 @@ function FileUploadZone({ documentType, onProcessed }) {
           type="file"
           accept=".pdf"
           multiple
-          onChange={(e) => Array.from(e.target.files || []).forEach(processFile)}
+          onChange={(e) => handleFiles(e.target.files)}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
         />
         <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
