@@ -1,4 +1,4 @@
-// Israeli pension calculation utilities
+ο»Ώ// Israeli pension calculation utilities
 
 export const DEFAULT_INFLATION_PCT = 2.5;
 
@@ -135,7 +135,11 @@ export function projectEducationFund(currentBalance, monthlyDeposit, annualRetur
 }
 
 export function calculateAverageReturn(documents) {
-  const validDocs = (documents || []).filter((d) => d.annual_return_pct != null && d.annual_return_pct !== 0);
+  const validDocs = (documents || []).filter((d) => {
+    if (d?.status !== "completed") return false;
+    const value = Number(d?.annual_return_pct);
+    return Number.isFinite(value);
+  });
   if (validDocs.length === 0) return 4.5;
   const sum = validDocs.reduce((acc, d) => acc + Number(d.annual_return_pct || 0), 0);
   return sum / validDocs.length;
@@ -163,8 +167,9 @@ export function getAggregatedPensionData(documents) {
     return (docA.year || 0) > (docB.year || 0);
   };
 
-  for (const doc of completed) {
-    const key = doc.provider_name || "__unknown__";
+  for (const [index, doc] of completed.entries()) {
+    // If provider is missing, keep each file unique so we do not collapse all docs into one bucket.
+    const key = doc.provider_name || `__unknown__${doc.id || doc.file_name || index}`;
     if (!byProvider[key] || isNewer(doc, byProvider[key])) {
       byProvider[key] = doc;
     }
@@ -282,7 +287,7 @@ export function generateProjectionDataDetailed({
 }
 
 export function formatCurrency(amount) {
-  if (amount == null || Number.isNaN(Number(amount))) return "¤0";
+  if (amount == null || Number.isNaN(Number(amount))) return "β‚ª0";
   return new Intl.NumberFormat("he-IL", {
     style: "currency",
     currency: "ILS",
@@ -302,7 +307,7 @@ export function calculateOldAgePension(maritalStatus) {
     base,
     deduction,
     net: base - deduction,
-    note: "χφαϊ ζχπδ αριριϊ ξαιθεη μΰεξι (2025)",
+    note: "Χ§Χ¦Χ‘Χª Χ–Χ§Χ Χ” Χ‘Χ΅Χ™Χ΅Χ™Χª ΧΧ‘Χ™ΧΧ•Χ— ΧΧΧ•ΧΧ™ (2025)",
   };
 }
 
@@ -310,3 +315,4 @@ export function formatPercent(value) {
   if (value == null || Number.isNaN(Number(value))) return "0%";
   return `${Number(value).toFixed(1)}%`;
 }
+

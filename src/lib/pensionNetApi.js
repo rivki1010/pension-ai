@@ -54,26 +54,41 @@ function computeYearlyReturns(rows) {
   return result;
 }
 
-export async function fetchPensionNetData({ fromPeriod = 201901, limit = 10000 } = {}) {
-  const query = new URLSearchParams({
-    resource_id: PENSION_NET_RESOURCE_ID,
-    limit: String(limit),
-    sort: "REPORT_PERIOD asc",
-  });
+export async function fetchPensionNetData({ fromPeriod = 201901, limit = 1000 } = {}) {
+  // Pull data in pages to guarantee we load the full dataset even when it grows.
+  let offset = 0;
+  let total = Infinity;
+  const allRecords = [];
 
-  const url = `${BASE_URL}/datastore_search?${query.toString()}`;
-  const response = await fetch(url);
+  while (offset < total) {
+    const query = new URLSearchParams({
+      resource_id: PENSION_NET_RESOURCE_ID,
+      limit: String(limit),
+      offset: String(offset),
+      sort: "REPORT_PERIOD asc",
+    });
 
-  if (!response.ok) {
-    throw new Error(`Failed loading PensionNet data: ${response.status}`);
+    const url = `${BASE_URL}/datastore_search?${query.toString()}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Failed loading PensionNet data: ${response.status}`);
+    }
+
+    const payload = await response.json();
+    if (!payload?.success) {
+      throw new Error("PensionNet API returned unsuccessful response");
+    }
+
+    const result = payload.result || {};
+    const pageRecords = result.records || [];
+    total = Number(result.total || 0);
+
+    allRecords.push(...pageRecords);
+    if (pageRecords.length === 0) break;
+    offset += pageRecords.length;
   }
 
-  const payload = await response.json();
-  if (!payload?.success) {
-    throw new Error("PensionNet API returned unsuccessful response");
-  }
-
-  const records = (payload.result?.records || []).filter((r) => toNumber(r.REPORT_PERIOD) >= fromPeriod);
+  const records = allRecords.filter((r) => toNumber(r.REPORT_PERIOD) >= fromPeriod);
   const byFundId = new Map();
 
   for (const row of records) {
@@ -132,6 +147,7 @@ export async function fetchPensionNetData({ fromPeriod = 201901, limit = 10000 }
     funds,
     stats: {
       totalFunds: funds.length,
+      totalRowsLoaded: allRecords.length,
       latestReportPeriod: maxPeriod,
       latestReportPeriodLabel: formatYearMonth(maxPeriod),
       sourceCurrentDate: sourceDate,

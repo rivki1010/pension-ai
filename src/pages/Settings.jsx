@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { KeyRound, CheckCircle2, CircleAlert, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -71,22 +71,22 @@ export default function Settings() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-foreground font-rubik">AI Settings</h1>
-        <p className="text-muted-foreground">This app is local-first. Keys and profile data are saved in your browser only.</p>
+        <h1 className="text-3xl font-bold text-foreground font-rubik">הגדרות AI</h1>
+        <p className="text-muted-foreground">האפליקציה פועלת מקומית. המפתח והנתונים נשמרים רק בדפדפן שלך.</p>
       </div>
 
       <form onSubmit={handleSave} className="bg-card rounded-2xl border border-border/50 p-6 shadow-sm space-y-5">
         <div className="flex items-start gap-3">
           <div className="p-2.5 rounded-xl bg-primary/10"><KeyRound className="w-5 h-5 text-primary" /></div>
           <div className="space-y-1">
-            <p className="font-semibold text-foreground">Provider and API key</p>
-            <p className="text-xs text-muted-foreground">Supports OpenAI, Anthropic, Gemini, OpenRouter, Groq, and custom OpenAI-compatible endpoints.</p>
+            <p className="font-semibold text-foreground">ספק ומפתח API</p>
+            <p className="text-xs text-muted-foreground">תמיכה ב-OpenAI, Anthropic, Gemini, OpenRouter, Groq וספק תואם OpenAI.</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label>AI provider</Label>
+            <Label>ספק AI</Label>
             <Select value={provider} onValueChange={onProviderChange}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -96,37 +96,37 @@ export default function Settings() {
           </div>
 
           <div className="space-y-2">
-            <Label>Model</Label>
+            <Label>מודל</Label>
             <Input value={model} onChange={(e) => setModel(e.target.value)} dir="ltr" />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label>API key</Label>
+          <Label>מפתח API</Label>
           <Input type="password" autoComplete="off" dir="ltr" value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder="sk-... / claude-... / AIza..." />
         </div>
 
         {showBaseUrl && (
           <div className="space-y-2">
-            <Label>Base URL</Label>
+            <Label>כתובת בסיס</Label>
             <Input dir="ltr" value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} placeholder="https://api.example.com/v1" />
           </div>
         )}
 
         <Button type="submit" disabled={saving} className="gap-2">
           {saving ? <span className="inline-block h-4 w-4 rounded-full border-2 border-primary-foreground/40 border-t-primary-foreground animate-spin" /> : saved ? <CheckCircle2 className="w-4 h-4" /> : <Save className="w-4 h-4" />}
-          {saving ? "Saving..." : saved ? "Saved" : "Save settings"}
+          {saving ? "שומר..." : saved ? "נשמר" : "שמור הגדרות"}
         </Button>
       </form>
 
       <div className="bg-card rounded-2xl border border-border/50 p-6 shadow-sm space-y-3">
-        <h2 className="font-bold text-foreground font-rubik">Readiness</h2>
-        <StatusRow ok={hasApiKey} textOk="API key is configured" textMissing="Missing API key" />
-        <StatusRow ok={profileExists} textOk="Personal profile exists" textMissing="Missing personal profile" />
+        <h2 className="font-bold text-foreground font-rubik">מצב מערכת</h2>
+        <StatusRow ok={hasApiKey} textOk="מפתח API מוגדר" textMissing="חסר מפתח API" />
+        <StatusRow ok={profileExists} textOk="קיים פרופיל אישי" textMissing="חסר פרופיל אישי" />
 
         <div className="flex flex-wrap gap-2 pt-2">
-          <Button asChild variant="outline"><Link to="/calculator">Open calculator</Link></Button>
-          <Button asChild><Link to="/">Open wizard</Link></Button>
+          <Button asChild variant="outline"><Link to="/calculator">פתח מחשבון</Link></Button>
+          <Button asChild><Link to="/">פתח אשף</Link></Button>
         </div>
       </div>
     </div>

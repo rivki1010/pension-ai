@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -15,6 +15,7 @@ import {
   generateProjectionDataDetailed,
   getAggregatedPensionData,
   getCurrentAge,
+  getLatestDocumentData,
   projectBalanceWithDynamicFeesAndGrowth,
   yearsToRetirement,
 } from "@/lib/pensionCalculations";
@@ -27,13 +28,24 @@ export default function StepResults({ profile, documents, returnMode, manualRetu
     if (!profile) return null;
 
     const aggPension = getAggregatedPensionData(documents);
+    const latestPensionDoc = getLatestDocumentData(documents, "pension");
     const annualReturn = returnMode === "auto" ? calculateAverageReturn(documents) : manualReturn;
-    const startBalance = aggPension?.total_balance || 0;
-    const severanceBalance = aggPension?.severance_balance || 0;
+
+    // As requested: base balance comes from the most up-to-date pension file.
+    const startBalance = Number(latestPensionDoc?.total_balance ?? aggPension?.total_balance ?? 0);
+    const severanceBalance = Number(latestPensionDoc?.severance_balance ?? aggPension?.severance_balance ?? 0);
+
+    const latestMonthlyDepositFromParts =
+      Number(latestPensionDoc?.employee_deposit || 0) + Number(latestPensionDoc?.employer_deposit || 0);
+
     const monthlyDepositGross =
-      (aggPension?.employee_deposit || 0) + (aggPension?.employer_deposit || 0) > 0
-        ? (aggPension?.employee_deposit || 0) + (aggPension?.employer_deposit || 0)
-        : aggPension?.monthly_deposit || 0;
+      latestMonthlyDepositFromParts > 0
+        ? latestMonthlyDepositFromParts
+        : Number(
+            latestPensionDoc?.monthly_deposit ??
+              aggPension?.monthly_deposit ??
+              0
+          );
 
     const years = yearsToRetirement(profile.birth_year, profile.retirement_age || 67);
     const currentAge = getCurrentAge(profile.birth_year);
@@ -74,6 +86,7 @@ export default function StepResults({ profile, documents, returnMode, manualRetu
       monthlyPension,
       tax,
       projectionData,
+      latestFileName: latestPensionDoc?.file_name || null,
     };
   }, [profile, documents, returnMode, manualReturn, includeCompensation, valueMode]);
 
@@ -84,7 +97,12 @@ export default function StepResults({ profile, documents, returnMode, manualRetu
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-start justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-2xl font-bold text-foreground font-rubik">תוצאות התחזית</h2>
-          <p className="text-muted-foreground text-sm">גיל {calc.currentAge} | עוד {calc.years} שנים לפרישה | תשואה שנתית {formatPercent(calc.annualReturn)}</p>
+          <p className="text-muted-foreground text-sm">
+            גיל {calc.currentAge} | עוד {calc.years} שנים לפרישה | תשואה שנתית ממוצעת {formatPercent(calc.annualReturn)}
+          </p>
+          {calc.latestFileName ? (
+            <p className="text-xs text-muted-foreground mt-1">יתרת הבסיס נלקחה מהמסמך העדכני ביותר: {calc.latestFileName}</p>
+          ) : null}
         </div>
         <Button variant="outline" onClick={onRestart} className="gap-2"><RefreshCw className="w-4 h-4" />התחל מחדש</Button>
       </motion.div>

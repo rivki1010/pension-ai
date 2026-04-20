@@ -37,7 +37,7 @@ export default function FundsComparison() {
       try {
         setLoading(true);
         setError("");
-        const result = await fetchPensionNetData({ fromPeriod: 201901, limit: 10000 });
+        const result = await fetchPensionNetData({ fromPeriod: 201901, limit: 1000 });
 
         if (!mounted) return;
 
@@ -124,7 +124,7 @@ export default function FundsComparison() {
         </p>
         {meta && (
           <p className="text-xs text-muted-foreground">
-            Source date: {meta.sourceCurrentDate || "Unknown"} | Latest report period: {meta.latestReportPeriodLabel} | Funds: {meta.totalFunds}
+            Source date: {meta.sourceCurrentDate || "Unknown"} | Latest report period: {meta.latestReportPeriodLabel} | Funds: {meta.totalFunds} | Rows loaded: {meta.totalRowsLoaded}
           </p>
         )}
       </motion.div>

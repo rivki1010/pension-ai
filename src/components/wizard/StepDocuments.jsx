@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+﻿import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { extractDataWithAI } from "@/api/aiClient";
 import * as pdfjsLib from "pdfjs-dist";
@@ -56,7 +56,7 @@ function FileUploadZone({ documentType, onProcessed }) {
 
       const text = await extractTextFromPDF(file);
       if (!text.trim()) {
-        throw new Error("לא הצלחתי לחלץ טקסט מה-PDF.");
+        throw new Error("לא הצלחתי לחלץ טקסט מתוך קובץ ה-PDF.");
       }
 
       const extractedData = await extractDataWithAI(text, documentType);
@@ -82,6 +82,7 @@ function FileUploadZone({ documentType, onProcessed }) {
   const handleFiles = useCallback(async (fileList) => {
     setDragActive(false);
     const filesArray = Array.from(fileList || []);
+
     for (let i = 0; i < filesArray.length; i++) {
       await processFile(filesArray[i]);
       if (filesArray.length > 1 && i < filesArray.length - 1) {
@@ -106,12 +107,14 @@ function FileUploadZone({ documentType, onProcessed }) {
     done: CheckCircle2,
     error: AlertCircle,
   };
+
   const statusText = {
     uploading: "קורא קובץ...",
     extracting: "מחלץ נתונים עם AI...",
     done: "הושלם",
     error: "שגיאה",
   };
+
   const statusColor = {
     uploading: "text-primary",
     extracting: "text-amber-500",
@@ -157,11 +160,7 @@ function FileUploadZone({ documentType, onProcessed }) {
                 <p className="text-sm font-medium truncate">{f.name}</p>
                 <p className={`text-xs ${statusColor[f.status]}`}>{f.error || statusText[f.status]}</p>
               </div>
-              <Icon
-                className={`w-4 h-4 ${statusColor[f.status]} ${
-                  ["uploading", "extracting"].includes(f.status) ? "animate-spin" : ""
-                } shrink-0`}
-              />
+              <Icon className={`w-4 h-4 ${statusColor[f.status]} ${["uploading", "extracting"].includes(f.status) ? "animate-spin" : ""} shrink-0`} />
             </motion.div>
           );
         })}
@@ -178,7 +177,6 @@ export default function StepDocuments({ initialDocuments, onNext, onBack }) {
     setDocuments(updatedDocs);
 
     localStorage.setItem("pension_documents", JSON.stringify(updatedDocs));
-    // Keep compatibility with existing local-first layer used by other pages.
     localStorage.setItem("pension_ai_pension_documents", JSON.stringify(updatedDocs));
   };
 
@@ -193,7 +191,7 @@ export default function StepDocuments({ initialDocuments, onNext, onBack }) {
         </div>
         <div>
           <h2 className="text-2xl font-bold text-foreground font-rubik">העלאת מסמכים</h2>
-          <p className="text-muted-foreground text-sm">קריאה מקומית של PDF וחילוץ נתונים עם מפתח ה-API האישי שלך.</p>
+          <p className="text-muted-foreground text-sm">היתרה תחושב לפי המסמך העדכני ביותר. התשואה תחושב כממוצע מכל המסמכים התקינים.</p>
         </div>
       </div>
 
